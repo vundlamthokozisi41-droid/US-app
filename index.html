@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0a0405" />
+  <title>Us 💛</title>
+  <link rel="manifest" href="manifest.json" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0405;
+      --surface: #130a0c;
+      --card: #1c1014;
+      --border: #2e1a20;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --rose: #b05070;
+      --text: #f0e8d8;
+      --muted: #8a7060;
+      --accent: #7a3048;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* --- NOTIFICATION TOAST --- */
+    #toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: linear-gradient(135deg, var(--card), var(--accent));
+      border: 1px solid var(--gold);
+      border-radius: 16px;
+      padding: 14px 24px;
+      z-index: 10000;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      text-align: center;
+      max-width: 320px;
+      width: 90%;
+      box-shadow: 0 8px 40px rgba(201,168,76,0.2);
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast .toast-title { color: var(--gold); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+    #toast .toast-msg { color: var(--text); font-size: 1.1rem; font-style: italic; }
+
+    /* --- HEADER --- */
+    header {
+      text-align: center;
+      padding: 48px 20px 24px;
+      position: relative;
+    }
+    .hearts-bg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      opacity: 0.06;
+      font-size: 80px;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .app-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.2rem;
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      color: var(--gold-light);
+      text-shadow: 0 0 40px rgba(201,168,76,0.3);
+    }
+    .app-sub {
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* --- NAV TABS --- */
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 20px 24px;
+    }
+    nav button {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    nav button.active, nav button:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201,168,76,0.07);
+    }
+
+    /* --- PAGES --- */
+    .page { display: none; padding: 0 16px 80px; max-width: 600px; margin: 0 auto; animation: fadeUp 0.4s ease; }
+    .page.active { display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* --- COUNTDOWN --- */
+    .countdown-card {
+      background: linear-gradient(145deg, var(--card), var(--surface));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px 28px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .countdown-card::before {
+      content: '♡';
+      position: absolute;
+      font-size: 180px;
+      color: var(--rose);
+      opacity: 0.04;
+      top: -30px;
+      right: -20px;
+      line-height: 1;
+    }
+    .since-label {
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .since-date {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      color: var(--gold);
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .time-block {
+      background: rgba(201,168,76,0.06);
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 16px;
+      padding: 18px 12px;
+    }
+    .time-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.6rem;
+      font-weight: 300;
+      color: var(--gold-light);
+      line-height: 1;
+      display: block;
+    }
+    .time-label {
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+      display: block;
+    }
+    .minutes-block {
+      grid-column: span 2;
+      background: rgba(176,80,112,0.08);
+      border-color: rgba(176,80,112,0.2);
+    }
+    .minutes-block .time-number { font-size: 2rem; color: #e0a0b8; }
+
+    .next-anniversary {
+      background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(176,80,112,0.1));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 16px;
+    }
+    .next-ann-label { font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .next-ann-date { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--gold); font-style: italic; }
+
+    /* --- SETUP SECTION --- */
+    .setup-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .setup-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+    .setup-card label {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .setup-card input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color 0.3s;
+    }
+    .setup-card input:focus { border-color: var(--gold); }
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), #5a1828);
+      border: 1px solid var(--rose);
+      color: var(--text);
+      padding: 14px;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn:hover { background: linear-gradient(135deg, var(--rose), var(--accent)); box-shadow: 0 4px 20px rgba(176,80,112,0.3); }
+    .btn-gold {
+      background: linear-gradient(135deg, #8a6a20, #5a4010);
+      border-color: var(--gold);
+    }
+    .btn-gold:hover { background: linear-gradient(135deg, var(--gold), #8a6a20); color: var(--bg); }
+
+    /* --- MESSAGES --- */
+    .user-switcher {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .user-btn {
+      flex: 1;
+      padding: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    .user-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.08); }
+
+    .messages-container {
+      height: 380px;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+      scroll-behavior: smooth;
+    }
+    .messages-container::-webkit-scrollbar { width: 4px; }
+    .messages-container::-webkit-scrollbar-track { background: transparent; }
+    .messages-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .msg-bubble {
+      max-width: 78%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      position: relative;
+      animation: bubbleIn 0.3s ease;
+    }
+    @keyframes bubbleIn { from { opacity: 0; transform: scale(0.9) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+    .msg-bubble.sent {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--accent), #7a2040);
+      color: var(--text);
+      border-bottom-right-radius: 4px;
+    }
+    .msg-bubble.received {
+      align-self: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+    .msg-time {
+      font-size: 0.62rem;
+      color: var(--muted);
+      margin-top: 4px;
+      display: block;
+    }
+    .msg-sender {
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+      color: var(--gold);
+      margin-bottom: 2px;
+      display: block;
+      text-transform: uppercase;
+    }
+    .empty-msgs {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--muted);
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .message-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .message-input-row input {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 18px;
+      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .message-input-row input:focus { border-color: var(--rose); }
+    .send-btn {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--rose));
+      border: none;
+      border-radius: 14px;
+      color: white;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .send-btn:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(176,80,112,0.4); }
+
+    /* --- BOTTOM NAV --- */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10,4,5,0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      z-index: 100;
+    }
+    .bnav-btn {
+      flex: 1;
+      max-width: 120px;
+      padding: 12px 4px 10px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: color 0.3s;
+      font-family: 'Lato', sans-serif;
+    }
+    .bnav-btn .icon { font-size: 1.4rem; }
+    .bnav-btn .label { font-size: 0.58rem; letter-spacing: 1.5px; text-transform: uppercase; }
+    .bnav-btn.active { color: var(--gold); }
+
+    /* Notification banner */
+    .notif-permission {
+      background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(176,80,112,0.1));
+      border: 1px solid var(--gold);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .notif-permission p { font-size: 0.85rem; color: var(--text); line-height: 1.5; flex: 1; }
+    .notif-permission button {
+      background: var(--gold);
+      border: none;
+      color: var(--bg);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Love note card */
+    .love-note {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--rose);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 20px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--text);
+      line-height: 1.7;
+      text-align: center;
+    }
+    .love-note .quote-mark { font-size: 2rem; color: var(--rose); line-height: 0; vertical-align: -0.4em; }
+
+    /* Scrollbar for whole page */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+  </style>
+</head>
+<body>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toast">
+  <div class="toast-title" id="toast-title">💛 Message</div>
+  <div class="toast-msg" id="toast-msg"></div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="hearts-bg">♡ ♡ ♡</div>
+  <div class="app-title" id="app-title">Us 💛</div>
+  <div class="app-sub" id="app-sub">a private signal between two people</div>
+</header>
+
+<!-- NAV TABS -->
+<nav>
+  <button class="active" onclick="showPage('home')">Home</button>
+  <button onclick="showPage('messages')">Messages</button>
+  <button onclick="showPage('settings')">Setup</button>
+</nav>
+
+<!-- ===== HOME PAGE ===== -->
+<div class="page active" id="page-home">
+
+  <!-- Notification permission banner -->
+  <div class="notif-permission" id="notif-banner" style="display:none;">
+    <p>Turn on notifications to get anniversary reminders & message alerts 💛</p>
+    <button onclick="requestNotifications()">Enable</button>
+  </div>
+
+  <!-- Countdown -->
+  <div class="countdown-card">
+    <div class="since-label">Together since</div>
+    <div class="since-date" id="since-display">Set your date in Setup ↗</div>
+    <div class="time-grid" id="time-grid">
+      <div class="time-block">
+        <span class="time-number" id="cnt-years">—</span>
+        <span class="time-label">Years</span>
+      </div>
+      <div class="time-block">
+        <span class="time-number" id="cnt-months">—</span>
+        <span class="time-label">Months</span>
+      </div>
+      <div class="time-block">
+        <span class="time-number" id="cnt-weeks">—</span>
+        <span class="time-label">Weeks</span>
+      </div>
+      <div class="time-block">
+        <span class="time-number" id="cnt-days">—</span>
+        <span class="time-label">Days</span>
+      </div>
+      <div class="time-block minutes-block">
+        <span class="time-number" id="cnt-minutes">—</span>
+        <span class="time-label">Minutes Together</span>
+      </div>
+    </div>
+    <div class="next-anniversary">
+      <div class="next-ann-label">Next monthly anniversary</div>
+      <div class="next-ann-date" id="next-ann">—</div>
+    </div>
+  </div>
+
+  <!-- Love note -->
+  <div class="love-note">
+    <span class="quote-mark">"</span>
+    lerato fela ntate — love only.
+    <span class="quote-mark">"</span>
+  </div>
+</div>
+
+<!-- ===== MESSAGES PAGE ===== -->
+<div class="page" id="page-messages">
+
+  <div class="user-switcher">
+    <div class="user-btn active" id="user-btn-1" onclick="switchUser(1)">
+      <div style="font-size:1.2rem;">👤</div>
+      <div id="user1-label">You</div>
+    </div>
+    <div style="display:flex;align-items:center;color:var(--muted);font-size:1.2rem;">💛</div>
+    <div class="user-btn" id="user-btn-2" onclick="switchUser(2)">
+      <div style="font-size:1.2rem;">👤</div>
+      <div id="user2-label">Her</div>
+    </div>
+  </div>
+
+  <div class="messages-container" id="messages-box">
+    <div class="empty-msgs" id="empty-msg">
+      Your conversations will appear here.<br/>
+      <span style="font-size:0.8rem;margin-top:6px;display:block;">Send the first message 💛</span>
+    </div>
+  </div>
+
+  <div class="message-input-row">
+    <input type="text" id="msg-input" placeholder="Say something beautiful…" onkeydown="if(event.key==='Enter') sendMessage()" />
+    <button class="send-btn" onclick="sendMessage()">↑</button>
+  </div>
+</div>
+
+<!-- ===== SETTINGS PAGE ===== -->
+<div class="page" id="page-settings">
+
+  <div class="setup-card">
+    <div class="setup-title">✦ Your Names</div>
+    <label>Your Name</label>
+    <input type="text" id="name1" placeholder="e.g. Mthokozisi" />
+    <label>Her Name</label>
+    <input type="text" id="name2" placeholder="e.g. AC" />
+    <button class="btn btn-gold" onclick="saveNames()">Save Names</button>
+  </div>
+
+  <div class="setup-card">
+    <div class="setup-title">✦ Your Anniversary Date</div>
+    <label>The day your story began</label>
+    <input type="date" id="start-date" />
+    <button class="btn" onclick="saveDate()">Save Date</button>
+  </div>
+
+  <div class="setup-card">
+    <div class="setup-title">✦ Test Anniversary Alert</div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+      Tap below to preview what the monthly anniversary notification looks like.
+    </p>
+    <button class="btn btn-gold" onclick="testAnniversaryNotification()">Preview Notification 💛</button>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="bnav-btn active" id="bnav-home" onclick="showPage('home')">
+    <span class="icon">♡</span>
+    <span class="label">Home</span>
+  </button>
+  <button class="bnav-btn" id="bnav-messages" onclick="showPage('messages')">
+    <span class="icon">💬</span>
+    <span class="label">Messages</span>
+  </button>
+  <button class="bnav-btn" id="bnav-settings" onclick="showPage('settings')">
+    <span class="icon">⚙</span>
+    <span class="label">Setup</span>
+  </button>
+</div>
+
+<script>
+  // ========== STATE ==========
+  let state = {
+    name1: localStorage.getItem('name1') || 'You',
+    name2: localStorage.getItem('name2') || 'Her',
+    startDate: localStorage.getItem('startDate') || null,
+    messages: JSON.parse(localStorage.getItem('messages') || '[]'),
+    currentUser: 1
+  };
+
+  // ========== INIT ==========
+  function init() {
+    applyNames();
+    if (state.startDate) {
+      document.getElementById('start-date').value = state.startDate;
+      updateCountdown();
+    }
+    renderMessages();
+    checkNotificationBanner();
+    checkAnniversaryToday();
+    setInterval(updateCountdown, 60000); // update every minute
+  }
+
+  function applyNames() {
+    document.getElementById('user1-label').textContent = state.name1;
+    document.getElementById('user2-label').textContent = state.name2;
+    document.getElementById('name1').value = state.name1 !== 'You' ? state.name1 : '';
+    document.getElementById('name2').value = state.name2 !== 'Her' ? state.name2 : '';
+    document.getElementById('app-sub').textContent = `${state.name1} & ${state.name2} — always`;
+  }
+
+  // ========== PAGES ==========
+  function showPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('bnav-' + page).classList.add('active');
+
+    const navBtns = document.querySelectorAll('nav button');
+    const pageMap = { home: 0, messages: 1, settings: 2 };
+    navBtns[pageMap[page]].classList.add('active');
+  }
+
+  // ========== COUNTDOWN ==========
+  function updateCountdown() {
+    if (!state.startDate) return;
+    const start = new Date(state.startDate);
+    const now = new Date();
+    const diffMs = now - start;
+
+    if (diffMs < 0) return;
+
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const totalDays = Math.floor(diffMs / 86400000);
+    const totalWeeks = Math.floor(totalDays / 7);
+
+    let years = now.getFullYear() - start.getFullYear();
+    let months = now.getMonth() - start.getMonth();
+    if (months < 0) { years--; months += 12; }
+    if (now.getDate() < start.getDate()) months--;
+    if (months < 0) { years--; months += 12; }
+
+    document.getElementById('cnt-years').textContent = years;
+    document.getElementById('cnt-months').textContent = months;
+    document.getElementById('cnt-weeks').textContent = totalWeeks.toLocaleString();
+    document.getElementById('cnt-days').textContent = totalDays.toLocaleString();
+    document.getElementById('cnt-minutes').textContent = totalMinutes.toLocaleString();
+
+    // Format since date
+    const opts = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('since-display').textContent = start.toLocaleDateString('en-ZA', opts);
+
+    // Next anniversary (1st of next month from start day)
+    const nextAnn = new Date(now.getFullYear(), now.getMonth() + 1, start.getDate());
+    if (nextAnn <= now) nextAnn.setMonth(nextAnn.getMonth() + 1);
+    const daysUntil = Math.ceil((nextAnn - now) / 86400000);
+    const annOpts = { month: 'long', day: 'numeric' };
+    document.getElementById('next-ann').textContent =
+      `${nextAnn.toLocaleDateString('en-ZA', annOpts)} — in ${daysUntil} days`;
+  }
+
+  // ========== SETTINGS SAVE ==========
+  function saveNames() {
+    const n1 = document.getElementById('name1').value.trim() || 'You';
+    const n2 = document.getElementById('name2').value.trim() || 'Her';
+    state.name1 = n1; state.name2 = n2;
+    localStorage.setItem('name1', n1);
+    localStorage.setItem('name2', n2);
+    applyNames();
+    showToast('Names saved 💛', `${n1} & ${n2}`);
+  }
+
+  function saveDate() {
+    const d = document.getElementById('start-date').value;
+    if (!d) return;
+    state.startDate = d;
+    localStorage.setItem('startDate', d);
+    updateCountdown();
+    showToast('Anniversary date saved 💛', 'Counting every moment…');
+  }
+
+  // ========== MESSAGES ==========
+  function switchUser(u) {
+    state.currentUser = u;
+    document.getElementById('user-btn-1').classList.toggle('active', u === 1);
+    document.getElementById('user-btn-2').classList.toggle('active', u === 2);
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('msg-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const msg = {
+      text,
+      sender: state.currentUser,
+      senderName: state.currentUser === 1 ? state.name1 : state.name2,
+      time: new Date().toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' }),
+      id: Date.now()
+    };
+
+    state.messages.push(msg);
+    localStorage.setItem('messages', JSON.stringify(state.messages));
+    input.value = '';
+    renderMessages();
+
+    // Show notification toast as if received from the other person
+    const otherName = state.currentUser === 1 ? state.name2 : state.name1;
+    setTimeout(() => {
+      showToast(`💛 New message from ${otherName}`, text);
+      sendPushNotification(`💛 ${otherName}`, text);
+    }, 500);
+  }
+
+  function renderMessages() {
+    const box = document.getElementById('messages-box');
+    const empty = document.getElementById('empty-msg');
+
+    if (state.messages.length === 0) {
+      empty.style.display = 'flex';
+      return;
+    }
+    empty.style.display = 'none';
+
+    // Clear and re-render
+    box.innerHTML = '';
+    state.messages.forEach(msg => {
+      const div = document.createElement('div');
+      const isSent = msg.sender === state.currentUser;
+      div.className = `msg-bubble ${isSent ? 'sent' : 'received'}`;
+      div.innerHTML = `
+        <span class="msg-sender">${msg.senderName}</span>
+        ${msg.text}
+        <span class="msg-time">${msg.time}</span>
+      `;
+      box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // ========== TOAST ==========
+  function showToast(title, msg) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-title').textContent = title;
+    document.getElementById('toast-msg').textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  // ========== NOTIFICATIONS ==========
+  function checkNotificationBanner() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      document.getElementById('notif-banner').style.display = 'flex';
+    }
+  }
+
+  function requestNotifications() {
+    if (!('Notification' in window)) return;
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        document.getElementById('notif-banner').style.display = 'none';
+        showToast('Notifications on! 💛', 'You\'ll never miss a moment.');
+        new Notification('Us 💛', { body: 'Love notifications are now on. lerato fela.' });
+      }
+    });
+  }
+
+  function sendPushNotification(title, body) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: 'icon-192.png' });
+    }
+  }
+
+  function checkAnniversaryToday() {
+    if (!state.startDate) return;
+    const start = new Date(state.startDate);
+    const today = new Date();
+    if (today.getDate() === start.getDate()) {
+      // It's the monthly anniversary!
+      const years = today.getFullYear() - start.getFullYear();
+      let months = (today.getFullYear() - start.getFullYear()) * 12 + (today.getMonth() - start.getMonth());
+      const msg = months < 12
+        ? `Happy ${months} month anniversary! 💛 May your love grow. — ${state.name1} & ${state.name2}`
+        : `Happy ${years} year anniversary! 💛 May your love grow. — ${state.name1} & ${state.name2}`;
+
+      setTimeout(() => {
+        showToast('💛 Happy Anniversary!', msg);
+        sendPushNotification('Happy Anniversary! 💛', msg);
+      }, 2000);
+    }
+  }
+
+  function testAnniversaryNotification() {
+    const name1 = state.name1;
+    const name2 = state.name2;
+    showToast('💛 Happy Anniversary!', `Happy 1 month anniversary! May your love grow. — ${name1} & ${name2}`);
+    sendPushNotification('Happy Anniversary! 💛', `Happy 1 month anniversary! May your love grow. — ${name1} & ${name2}`);
+  }
+
+  // ========== RUN ==========
+  init();
+</script>
+</body>
+</html>
